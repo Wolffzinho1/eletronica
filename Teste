@@ -1,0 +1,74 @@
+#include <SoftwareSerial.h>
+#include "DFRobotDFPlayerMini.h"
+
+SoftwareSerial HM10(2, 3); // RX = 2, TX = 3
+SoftwareSerial playerMP3Serial(10, 11); // RX = 10, TX = 11
+DFRobotDFPlayerMini playerMP3;
+
+const volumeMP=15
+#define DEBUG
+
+const led = 13;
+
+char appData;  
+String inData = "";
+void setup(){
+  Serial.begin(9600); 
+  HM10.begin(9600); 
+  pinMode(led, OUTPUT); // coloca o led como output
+  digitalWrite(led, LOW); // define o led como desligado
+  playerMP3Serial.begin(9600);
+  if (!playerMP3.begin(playerMP3Serial)) {
+    Serial.println(F("Falha:"));
+    Serial.println(F("1.conexões!"));
+    Serial.println(F("2.cheque o cartão SD!"));
+    while(true){
+      delay(0);
+    }
+  }
+  Serial.println("MP3 iniciado!");
+  playerMP3.volume(volumeMP3);
+
+  #ifdef DEBUG
+    Serial.println("o setup acabou");
+  #endif
+}
+
+void loop() {
+  HM10.listen();  
+  while (HM10.available() > 0) {  
+    appData = HM10.read();
+    inData = String(appData); 
+    Serial.write(appData);
+  }
+
+  if (Serial.available()) {           
+    delay(10);
+    HM10.write(Serial.read());
+  }
+  if ( inData == "COMECAR") {
+    analogWrite(led, 128);
+    for (int i = 1; i<nummaximo; i++){
+    playerMP3.playFolder(1, i)
+    delay(180000);
+    }
+  }
+  if ( inData == "PARAR") {
+    analogWrite(led, 255);
+    playerMP3.stop();
+    }
+  if ( inData == "+"){
+    if(volumeMP3 == 30){
+      Serial.println("Não foi possivel");
+    }else{
+      volumeMP3 += 1;
+    }
+  }
+  if ( inData == "-"){
+    if(volumeMP3 == 0){
+      Serial.println("Não foi possivel");
+    }else{
+      volumeMP3 -= 1;
+    }
+  }
+}
